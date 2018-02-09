@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>dfxp2srt</title>
+    <script src="jquery.js"></script>
+    <script src="FileSaver.js"></script>
+    <style>
+        html {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            height: 95%;
+            width: 95%;
+            overflow: hidden;
+        }
+        
+        #container {
+            border: 1px solid #aaa;
+            width: 75%;
+            height: 75%;
+            margin: 10%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <h3>Drop DFXP File into the box</h3>
+    </div>
+    <script>
+        document.ondragover = function(e) {
+            e.preventDefault();
+        };
+        document.ondrop = function(e) {
+            e.preventDefault();
+        };
+        container.ondragover = function(e) {
+            e.preventDefault();
+        };
+        container.ondrop = function(e) {
+            console.log(e.dataTransfer);
+            var list = e.dataTransfer.files;
+            window.FileName = e.dataTransfer.files[0].name;
+            for (var i = 0; i < list.length; i++) {
+                var f = list[i];
+                reader(f);
+            }
+        };
+
+        function reader(f) {
+            var reader = new FileReader();
+            reader.readAsDataURL(f);
+            reader.onload = function() {
+                //console.log(reader.result);
+                text = document.createElement("textarea");
+                try {
+                    text.value = atob(reader.result.substr(13));
+                    text.value = text.value.replace(/tt:/g, "")
+                } catch (err) {
+                    console.error("wrong file!");
+                }
+
+                //container.appendChild(text);
+                var _o = $(text.value);
+                var _i = 0;
+                var _out = "";
+                _o.children("div").children("p").each(function() {
+                    _i = _i + 1;
+                    var _begin = this.getAttribute("begin").replace(/\./g, ",");
+                    var _end = this.getAttribute("end").replace(/\./g, ",");
+                    var _text = $(this).text();
+                    _out = _out + _i + "\n" + _begin + " --> " + _end + "\n" + _text + "\n\n";
+                });
+                allBlob = new Blob([_out], {
+                    type: "text/plain;charset=utf-8"
+                });
+                saveAs(allBlob, FileName + ".srt");
+            }
+        }
+    </script>
+</body>
+
+</html>
